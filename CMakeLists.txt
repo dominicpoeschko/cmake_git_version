@@ -3,7 +3,8 @@ set(cmake_git_version_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 find_package(Git REQUIRED)
 
 set(cmake_git_version_template_file_git ${cmake_git_version_dir}/templates/git_version_generated.hpp.in)
-set(cmake_git_version_out_file_git ${CMAKE_CURRENT_BINARY_DIR}/cmake_git_version_generated/cmake_git_version/git_version_generated.hpp)
+set(cmake_git_version_out_dir ${CMAKE_CURRENT_BINARY_DIR}/cmake_git_version_generated)
+set(cmake_git_version_out_file_git ${cmake_git_version_out_dir}/cmake_git_version/git_version_generated.hpp)
 set(cmake_git_version_state_file ${CMAKE_CURRENT_BINARY_DIR}/cmake_git_version_generated/git-sate)
 
 if(NOT cmake_git_version_working_dir)
@@ -134,6 +135,7 @@ function(target_add_version_headers target optimize_type)
 
   target_include_directories(${target} PRIVATE ${outdir})
   target_include_directories(${target} PRIVATE ${outdir_target})
+  target_include_directories(${target} PRIVATE ${cmake_git_version_out_dir})
   target_include_directories(${target} PRIVATE ${cmake_git_version_dir}/src)
 
   add_dependencies(${target} cmake_git_version_check_repository)
