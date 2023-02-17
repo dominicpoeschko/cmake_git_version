@@ -3,13 +3,17 @@ set(cmake_git_version_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 find_package(Git REQUIRED)
 
 set(cmake_git_version_template_file_git ${cmake_git_version_dir}/templates/git_version_generated.hpp.in)
-set(cmake_git_version_out_dir ${CMAKE_CURRENT_BINARY_DIR}/cmake_git_version_generated)
-set(cmake_git_version_out_file_git ${cmake_git_version_out_dir}/cmake_git_version/git_version_generated.hpp)
-set(cmake_git_version_state_file ${CMAKE_CURRENT_BINARY_DIR}/cmake_git_version_generated/git-sate)
 
 if(NOT cmake_git_version_working_dir)
   set(cmake_git_version_working_dir ${PROJECT_SOURCE_DIR})
 endif()
+
+if(NOT cmake_git_version_out_dir)
+    set(cmake_git_version_out_dir ${CMAKE_CURRENT_BINARY_DIR}/cmake_git_version_generated)
+endif()
+
+set(cmake_git_version_state_file ${cmake_git_version_out_dir}/cmake_git_version_generated/git-state)
+set(cmake_git_version_out_file_git ${cmake_git_version_out_dir}/cmake_git_version/git_version_generated.hpp)
 
 function(cmake_git_version_get_git_state _state)
   set(success "true")
@@ -123,6 +127,7 @@ else()
     ${CMAKE_COMMAND}
     -DCMAKE_GIT_VERSION_SUBPROCESS_RUNNING=TRUE
     -Dcmake_git_version_working_dir=${cmake_git_version_working_dir}
+    -Dcmake_git_version_out_dir=${cmake_git_version_out_dir}
     -P ${CMAKE_CURRENT_LIST_FILE}
   )
 endif()
