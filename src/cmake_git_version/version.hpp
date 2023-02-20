@@ -143,11 +143,8 @@ namespace detail {
 
     template<std::uint32_t... digits>
     struct to_chars {
-        static char const value[];
+        inline static constexpr std::array<char, sizeof...(digits)> value{('0' + digits)...};
     };
-
-    template<std::uint32_t... digits>
-    constexpr char to_chars<digits...>::value[] = {('0' + digits)..., 0};
 
     template<std::uint32_t rem, std::uint32_t... digits>
     struct explode : explode<rem / 10, rem % 10, digits...> {};
@@ -160,7 +157,7 @@ namespace detail {
 
     template<>
     struct num_to_string<0> {
-        inline static constexpr char value[2]{'0', 0};
+        inline static constexpr std::array<char, 1> value{'0'};
     };
 
     template<std::uint32_t Number>
@@ -216,6 +213,11 @@ namespace Compiler {
     static constexpr std::string_view Name{"Clang"};
     namespace detail {
         static constexpr Version Version{__clang_major__, __clang_minor__, __clang_patchlevel__};
+    }
+#elif defined(_MSC_VER)
+    static constexpr std::string_view Name{"MSVC"};
+    namespace detail {
+        static constexpr Version Version{_MSC_VER - (_MSC_VER % 100), _MSC_VER % 100, 0};
     }
 #else
     static constexpr std::string_view Name{"GCC"};
