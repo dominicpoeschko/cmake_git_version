@@ -162,8 +162,8 @@ namespace detail {
 
     template<std::uint32_t Number>
     static constexpr std::string_view toStringView{
-      std::begin(num_to_string<Number>::value),
-      std::size(num_to_string<Number>::value) - 1};
+      num_to_string<Number>::value.data(),
+      num_to_string<Number>::value.size()};
 
     template<Version version>
     static constexpr std::string_view VersionToStringView{StringViewMerge<decltype(makeGetter([]() {
