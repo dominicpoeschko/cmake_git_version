@@ -217,7 +217,7 @@ namespace Compiler {
 #elif defined(_MSC_VER)
     static constexpr std::string_view Name{"MSVC"};
     namespace detail {
-        static constexpr Version Version{_MSC_VER - (_MSC_VER % 100), _MSC_VER % 100, 0};
+        static constexpr Version Version{(_MSC_VER - (_MSC_VER % 100)) / 100, _MSC_VER % 100, 0};
     }
 #else
     static constexpr std::string_view Name{"GCC"};
