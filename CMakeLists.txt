@@ -80,6 +80,8 @@ function(cmake_git_version_get_git_state _state)
     set(commit_timevar "0000-01-01T00:00:00")
   endif()
 
+  string(REPLACE ";" "\;" subjectvar ${subjectvar})
+
   set(${_state}
       ${success} ${hashvar} ${dirty} "${subjectvar}" ${commit_timevar}
       PARENT_SCOPE)
