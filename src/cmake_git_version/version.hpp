@@ -8,10 +8,17 @@
 
 namespace CMakeGitVersion {
 namespace detail {
+#ifdef __clang__
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+#endif
     template<std::size_t N>
     consteval void compile_time_assert(char const (&str)[N], bool predicat) {
         [[maybe_unused]] auto const x = str[N - 1 + static_cast<std::size_t>(!predicat)];
     }
+#ifdef __clang__
+    #pragma clang diagnostic pop
+#endif
 }   // namespace detail
 
 struct DateTime {
@@ -81,12 +88,12 @@ struct DateTime {
             auto add = [&](auto ss) { out = std::copy(std::begin(ss), std::end(ss), out); };
 
             add(year);
-            *(out++) = '-';
+            add(std::string_view{"-"});
             add(month);
-            *(out++) = '-';
+            add(std::string_view{"-"});
             add(day1);
             add(day2);
-            *(out++) = ' ';
+            add(std::string_view{" "});
             add(time);
         }
     }
@@ -118,7 +125,7 @@ namespace detail {
             auto addString = [&it](std::string_view s) {
                 for(auto c : s) {
                     *it = c;
-                    ++it;
+                    std::advance(it, 1);
                 }
             };
 
