@@ -1,13 +1,17 @@
 #pragma once
 
-namespace CMakeGitVersion { namespace Git {
+#include <string_view>
+
+namespace CMakeGitVersion::Git {
 #if !@GEN_GIT_RETRIEVED_STATE@
-    [[deprecated("git not found")]]
+[[deprecated("git not found")]]
 #endif
-    static constexpr std::string_view Hash{"@GEN_GIT_HEAD_SHA1@"};
-    static constexpr std::string_view Dirty{@GEN_GIT_IS_DIRTY@ ? ".dirty" : "" };
-    static constexpr std::string_view Subject{"@GEN_GIT_SUBJECT@"};
-    namespace detail {
-        static constexpr DateTime CommitTime{"@GEN_GIT_COMMIT_TIME@"};
-    }
-}}   // namespace CMakeGitVersion::Git
+static constexpr std::string_view Hash{"@GEN_GIT_HEAD_SHA1@"};
+static constexpr std::string_view Dirty { @GEN_GIT_IS_DIRTY@ ? ".dirty" : "" };
+static constexpr std::string_view Subject{"@GEN_GIT_SUBJECT@"};
+static constexpr std::string_view Branch{"@GEN_GIT_BRANCH@"};
+static constexpr std::string_view Tag{"@GEN_GIT_TAG@"};
+static constexpr std::string_view Author{"@GEN_GIT_AUTHOR@"};
+
+namespace detail { static constexpr DateTime CommitTime{"@GEN_GIT_COMMIT_TIME@"}; }
+}   // namespace CMakeGitVersion::Git
