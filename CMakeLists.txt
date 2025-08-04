@@ -321,6 +321,8 @@ function(cmake_git_version_add_headers_with_type target optimize_type)
     set(outfile_target ${outdir_target}/cmake_git_version/project_version_generated.hpp)
     set(template_dir ${cmake_git_version_dir}/templates)
 
+    include(FetchContent)
+
     FetchContent_GetProperties(cmake_git_version BINARY_DIR cmake_git_version_bindir)
     if(NOT "${cmake_git_version_bindir}" STREQUAL "")
         target_include_directories(${target} PRIVATE "${cmake_git_version_bindir}/cmake_git_version_generated")
