@@ -3,7 +3,7 @@
 #include <string_view>
 
 namespace CMakeGitVersion::Git {
-#if !@GEN_GIT_RETRIEVED_STATE@
+#if !@GEN_GIT_RETRIEVED_STATE@   // NOLINT
 [[deprecated("git not found")]]
 #endif
 static constexpr std::string_view Hash{"@GEN_GIT_HEAD_SHA1@"};

@@ -7,7 +7,9 @@ static constexpr std::string_view Name{"@GEN_PROJECT_NAME@"};
 
 namespace detail {
     static constexpr Version Version {
-        @GEN_PROJECT_VERSION_MAJOR@, @GEN_PROJECT_VERSION_MINOR@, @GEN_PROJECT_VERSION_PATCH@
+        .major = @GEN_PROJECT_VERSION_MAJOR@,
+        .minor = @GEN_PROJECT_VERSION_MINOR@,
+        .patch = @GEN_PROJECT_VERSION_PATCH@
     };
 }   // namespace detail
 }   // namespace CMakeGitVersion::Project

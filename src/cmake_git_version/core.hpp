@@ -40,7 +40,7 @@ struct DateTime {
             detail::compile_time_assert("bad DateTime", input[13] == ':');
             detail::compile_time_assert("bad DateTime", input[16] == ':');
 
-            std::copy(input.begin(), input.end(), buffer.begin());
+            std::ranges::copy(input, buffer.begin());
             buffer[10] = ' ';
         } else if(input.size() == 20) {
             detail::compile_time_assert("bad DateTime", input.size() == 20);
@@ -74,9 +74,8 @@ struct DateTime {
             auto const day1 = [&]() {
                 if(input[4] == ' ') {
                     return std::string_view("0");
-                } else {
-                    return input.substr(4, 1);
                 }
+                return input.substr(4, 1);
             }();
             auto const day2 = input.substr(5, 1);
             auto const year = input.substr(7, 4);

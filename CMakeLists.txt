@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 
 set(cmake_git_version_dir
     ${CMAKE_CURRENT_LIST_DIR}
