@@ -13,9 +13,7 @@ struct StringViewMerge {
         constexpr auto        viewsToAdd = ViewsToAddGetter::get();
         constexpr std::size_t arraySize  = [&]() {
             std::size_t sum = 0;
-            for(auto v : viewsToAdd) {
-                sum += v.size();
-            }
+            for(auto v : viewsToAdd) { sum += v.size(); }
             return sum;
         }();
 
@@ -29,9 +27,7 @@ struct StringViewMerge {
             }
         };
 
-        for(auto const& v : viewsToAdd) {
-            addString(v);
-        }
+        for(auto const& v : viewsToAdd) { addString(v); }
 
         return ret;
     }

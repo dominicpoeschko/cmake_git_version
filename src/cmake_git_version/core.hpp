@@ -72,9 +72,7 @@ struct DateTime {
             }
 
             auto const day1 = [&]() {
-                if(input[4] == ' ') {
-                    return std::string_view("0");
-                }
+                if(input[4] == ' ') { return std::string_view("0"); }
                 return input.substr(4, 1);
             }();
             auto const day2 = input.substr(5, 1);
