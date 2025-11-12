@@ -312,7 +312,8 @@ else()
         COMMAND
             ${CMAKE_COMMAND} -DCMAKE_GIT_VERSION_SUBPROCESS_RUNNING=TRUE
             -Dcmake_git_version_working_dir=${cmake_git_version_working_dir}
-            -Dcmake_git_version_out_dir=${cmake_git_version_out_dir} -P ${CMAKE_CURRENT_LIST_FILE})
+            -Dcmake_git_version_out_dir=${cmake_git_version_out_dir} -P ${CMAKE_CURRENT_LIST_FILE}
+        COMMENT "Updating git version information")
 endif()
 
 function(cmake_git_version_add_headers_with_type target optimize_type)
