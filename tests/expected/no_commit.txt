@@ -1,0 +1,17 @@
+#pragma once
+
+#include <string_view>
+
+namespace CMakeGitVersion::Git {
+#if !false   // NOLINT
+[[deprecated("git not found")]]
+#endif
+static constexpr std::string_view Hash{"no-git-repo"};
+static constexpr std::string_view Dirty { false ? ".dirty" : "" };
+static constexpr std::string_view Subject{"no-commits"};
+static constexpr std::string_view Branch{"no-branch"};
+static constexpr std::string_view Tag{"no-tag"};
+static constexpr std::string_view Author{"no-author"};
+
+namespace detail { static constexpr DateTime CommitTime{"0000-01-01T00:00:00"}; }
+}   // namespace CMakeGitVersion::Git

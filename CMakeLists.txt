@@ -23,11 +23,54 @@ if(NOT EXISTS "${cmake_git_version_working_dir}")
     set(cmake_git_version_working_dir "${PROJECT_SOURCE_DIR}")
 endif()
 
-execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse --git-dir
-    WORKING_DIRECTORY "${cmake_git_version_working_dir}"
-    RESULT_VARIABLE git_check_result
-    OUTPUT_QUIET ERROR_QUIET)
+# git <args...> in the working directory: its trimmed standard output into <out>, its exit code into <rc>
+function(_cmake_git_version_git out rc)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} ${ARGN}
+        WORKING_DIRECTORY "${cmake_git_version_working_dir}"
+        RESULT_VARIABLE res
+        OUTPUT_VARIABLE output
+        ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(${out}
+        "${output}"
+        PARENT_SCOPE)
+    set(${rc}
+        ${res}
+        PARENT_SCOPE)
+endfunction()
+
+# <var> made fit for a C++ string literal in the template, cut to <max> characters ("..." at the end); TABS turns tabs
+# into spaces, SHELL backticks into ' and $ into \$, a `;` becomes \073. An empty value stays empty.
+function(_cmake_git_version_escape var max)
+    cmake_parse_arguments(PARSE_ARGV 2 E "TABS;SHELL" "" "")
+    # every expansion quoted: an empty value (git commit --allow-empty-message) stays one empty argument, and a `;`
+    # stays in the value instead of splitting it
+    set(value "${${var}}")
+    string(REPLACE "\"" "\\\"" value "${value}")
+    string(REPLACE "\n" " " value "${value}")
+    string(REPLACE "\r" " " value "${value}")
+    if(E_TABS)
+        string(REPLACE "\t" " " value "${value}")
+    endif()
+    if(E_SHELL)
+        string(REPLACE "`" "'" value "${value}")
+        string(REPLACE "$" "\\$" value "${value}")
+    endif()
+    string(LENGTH "${value}" length)
+    if(length GREATER max)
+        math(EXPR keep "${max} - 3")
+        string(SUBSTRING "${value}" 0 ${keep} value)
+        string(APPEND value "...")
+    endif()
+    # a `;` as the C++ octal escape \073 (three digits: the escape ends there whatever follows), after the cut so that
+    # the cut never splits it: the state is a CMake list, where a raw `;` would split the value into two elements
+    string(REPLACE ";" "\\073" value "${value}")
+    set(${var}
+        "${value}"
+        PARENT_SCOPE)
+endfunction()
+
+_cmake_git_version_git(ignored git_check_result rev-parse --git-dir)
 if(NOT git_check_result EQUAL 0)
     message(STATUS "CMakeGitVersion: Directory is not a git repository: ${cmake_git_version_working_dir}")
 endif()
@@ -51,13 +94,8 @@ set(cmake_git_version_out_file_git
 
 function(cmake_git_version_get_git_state _state)
     set(success "true")
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-        WORKING_DIRECTORY ${cmake_git_version_working_dir}
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE hashvar
-        ERROR_VARIABLE error_output
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    _cmake_git_version_git(hashvar res rev-parse --short HEAD)
     if(NOT res EQUAL 0)
         set(success "false")
         if(res EQUAL 128)
@@ -69,43 +107,26 @@ function(cmake_git_version_get_git_state _state)
         endif()
     endif()
 
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} status --porcelain
-        WORKING_DIRECTORY ${cmake_git_version_working_dir}
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE out
-        ERROR_VARIABLE status_error
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    _cmake_git_version_git(out res status --porcelain)
+    set(dirty "false")
     if(NOT res EQUAL 0)
         set(success "false")
-        set(dirty "false")
         if(res EQUAL 128)
             message(STATUS "CMakeGitVersion: Git status failed - not a git repository")
         else()
             message(STATUS "CMakeGitVersion: Git status failed (exit code: ${res})")
         endif()
-    else()
-        if(NOT "" STREQUAL "${out}")
-            string(REPLACE "\n" ";" out ${out})
-            list(FILTER out EXCLUDE REGEX "^\\?\\? ")
-            list(LENGTH out out)
-            if(NOT ${out} EQUAL 0)
-                set(dirty "true")
-            else()
-                set(dirty "false")
-            endif()
-        else()
-            set(dirty "false")
+    elseif(NOT "" STREQUAL "${out}")
+        # untracked files ("?? ") do not make the tree dirty
+        string(REPLACE "\n" ";" out ${out})
+        list(FILTER out EXCLUDE REGEX "^\\?\\? ")
+        list(LENGTH out out)
+        if(NOT ${out} EQUAL 0)
+            set(dirty "true")
         endif()
     endif()
 
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} log -n 1 --pretty=format:%s
-        WORKING_DIRECTORY ${cmake_git_version_working_dir}
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE subjectvar
-        ERROR_VARIABLE log_error
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    _cmake_git_version_git(subjectvar res log -n 1 --pretty=format:%s)
     if(NOT res EQUAL 0)
         set(success "false")
         if(res EQUAL 128)
@@ -116,27 +137,10 @@ function(cmake_git_version_get_git_state _state)
             set(subjectvar "log-error")
         endif()
     else()
-        string(REPLACE ";" "\;" subjectvar ${subjectvar})
-        string(REPLACE "\"" "\\\"" subjectvar ${subjectvar})
-        string(REPLACE "\n" " " subjectvar ${subjectvar})
-        string(REPLACE "\r" " " subjectvar ${subjectvar})
-        string(REPLACE "\t" " " subjectvar ${subjectvar})
-        string(REPLACE "`" "'" subjectvar ${subjectvar})
-        string(REPLACE "$" "\\$" subjectvar ${subjectvar})
-        string(LENGTH ${subjectvar} subject_length)
-        if(subject_length GREATER 200)
-            string(SUBSTRING ${subjectvar} 0 197 subjectvar)
-            string(APPEND subjectvar "...")
-        endif()
+        _cmake_git_version_escape(subjectvar 200 TABS SHELL)
     endif()
 
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} show --quiet --date=format-local:%Y-%m-%dT%H:%M:%S --format=%cd
-        WORKING_DIRECTORY ${cmake_git_version_working_dir}
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE commit_timevar
-        ERROR_VARIABLE show_error
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    _cmake_git_version_git(commit_timevar res show --quiet --date=format-local:%Y-%m-%dT%H:%M:%S --format=%cd)
     if(NOT res EQUAL 0)
         set(success "false")
         if(res EQUAL 128)
@@ -147,13 +151,7 @@ function(cmake_git_version_get_git_state _state)
         set(commit_timevar "0000-01-01T00:00:00")
     endif()
 
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-        WORKING_DIRECTORY ${cmake_git_version_working_dir}
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE branchvar
-        ERROR_VARIABLE branch_error
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    _cmake_git_version_git(branchvar res rev-parse --abbrev-ref HEAD)
     if(NOT res EQUAL 0)
         set(success "false")
         if(res EQUAL 128)
@@ -165,34 +163,14 @@ function(cmake_git_version_get_git_state _state)
         endif()
     endif()
 
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} describe --tags --exact-match
-        WORKING_DIRECTORY ${cmake_git_version_working_dir}
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE tagvar
-        ERROR_VARIABLE tag_error
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    _cmake_git_version_git(tagvar res describe --tags --exact-match)
     if(NOT res EQUAL 0)
         set(tagvar "no-tag")
     else()
-        string(REPLACE ";" "\;" tagvar ${tagvar})
-        string(REPLACE "\"" "\\\"" tagvar ${tagvar})
-        string(REPLACE "\n" " " tagvar ${tagvar})
-        string(REPLACE "\r" " " tagvar ${tagvar})
-        string(LENGTH ${tagvar} tag_length)
-        if(tag_length GREATER 50)
-            string(SUBSTRING ${tagvar} 0 47 tagvar)
-            string(APPEND tagvar "...")
-        endif()
+        _cmake_git_version_escape(tagvar 50)
     endif()
 
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%an
-        WORKING_DIRECTORY ${cmake_git_version_working_dir}
-        RESULT_VARIABLE res
-        OUTPUT_VARIABLE authorvar
-        ERROR_VARIABLE author_error
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    _cmake_git_version_git(authorvar res log -1 --pretty=format:%an)
     if(NOT res EQUAL 0)
         set(success "false")
         if(res EQUAL 128)
@@ -203,16 +181,7 @@ function(cmake_git_version_get_git_state _state)
             set(authorvar "unknown-author")
         endif()
     else()
-        string(REPLACE ";" "\;" authorvar ${authorvar})
-        string(REPLACE "\"" "\\\"" authorvar ${authorvar})
-        string(REPLACE "\n" " " authorvar ${authorvar})
-        string(REPLACE "\r" " " authorvar ${authorvar})
-        string(REPLACE "\t" " " authorvar ${authorvar})
-        string(LENGTH ${authorvar} author_length)
-        if(author_length GREATER 100)
-            string(SUBSTRING ${authorvar} 0 97 authorvar)
-            string(APPEND authorvar "...")
-        endif()
+        _cmake_git_version_escape(authorvar 100 TABS)
     endif()
 
     set(${_state}
@@ -230,8 +199,9 @@ endfunction()
 function(cmake_git_version_check_git _state_changed _state)
     cmake_git_version_get_git_state(state)
 
+    # quoted: an empty element (an empty subject) keeps its place in the list
     set(${_state}
-        ${state}
+        "${state}"
         PARENT_SCOPE)
 
     if(EXISTS ${cmake_git_version_state_file})
@@ -295,14 +265,6 @@ if(CMAKE_GIT_VERSION_SUBPROCESS_RUNNING)
         if(NOT EXISTS "${cmake_git_version_out_file_git}")
             message(FATAL_ERROR "CMakeGitVersion: Failed to generate header file: ${cmake_git_version_out_file_git}")
         endif()
-        set_property(
-            DIRECTORY
-            APPEND
-            PROPERTY CMAKE_CONFIGURE_DEPENDS ${cmake_git_version_out_file_git})
-        set_property(
-            DIRECTORY
-            APPEND
-            PROPERTY CMAKE_CONFIGURE_DEPENDS "${cmake_git_version_dir}/templates/git_version_generated.hpp.in")
     endif()
 else()
     add_custom_target(

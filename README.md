@@ -37,8 +37,8 @@ cmake_git_version_add_headers(${target_name})
 #include <print>
 
 int main() {
-    std::print("Version: {}\n", CMakeGitVersion::FullVersion);
-    std::print("Git Info: {}\n", CMakeGitVersion::GitInfo);  
+    std::print("Version: {}\n", CMakeGitVersion::fullVersion);
+    std::print("Git Info: {}\n", CMakeGitVersion::gitInfo);  
     std::print("Build Info: {}\n", CMakeGitVersion::BuildInfo);
     return 0;
 }
@@ -46,13 +46,13 @@ int main() {
 
 ## Available Version Strings
 
-- `FullVersion` - Complete version with project, git, build, and compiler info
+- `fullVersion` - Complete version with project, git, build, and compiler info
   - Example: `MyProject(1.0.0+abc1234* 2024-07-23 15:30:45 target/Release Clang-18.0.0)`
-- `NameTargetVersion` - Project name, target name, and version
+- `nameTargetVersion` - Project name, target name, and version
   - Example: `MyProject target 1.0.0`
-- `ShortVersion` - Project version with git hash (same as VersionWithGit)
+- `shortVersion` - Project version with git hash (same as VersionWithGit)
   - Example: `1.0.0+abc1234*`
-- `GitInfo` - Git branch, hash, and author information
+- `gitInfo` - Git branch, hash, and author information
   - Example: `branch:main abc1234* (author: John Doe)`
 - `DebugString` - Multi-line debug information with all details
 
@@ -75,7 +75,7 @@ For more granular access, individual components are available in specific namesp
 
 ### Target Information (`CMakeGitVersion::Target::`)
 - `Name` - CMake target name
-- `BuildTime` - Compile time timestamp
+- `buildTime` - Compile time timestamp
 - `CMakeTime` - CMake configuration timestamp
 
 ### Compiler Information (`CMakeGitVersion::Compiler::`)
@@ -83,3 +83,14 @@ For more granular access, individual components are available in specific namesp
 - `Version` - Compiler version
 - `Optimization` - Build type/optimization level
 
+
+## Tests
+
+`cmake -S tests -B build -G Ninja && ctest --test-dir build --output-on-failure` (git and CMake; one consumer configure
+needs a C++ compiler). The tests make scratch repositories with fixed authors and dates - not a repository, no commit,
+clean, dirty, untracked files only, tagged, detached HEAD, a path with spaces, a subject and an author that need
+escaping and cutting (a `;` becomes the octal escape `\073`), an empty subject - run the generation step on each and
+compare `git_version_generated.hpp` with `tests/expected/<case>.txt`; a second run of an unchanged state must not
+regenerate. A consumer project's `project_version_generated.hpp` is compared with its configure-time stamp masked
+(checked for its shape only).
+`-DUPDATE_EXPECTED=ON` on `tests/run.cmake` rewrites the expected files.

@@ -13,15 +13,15 @@ struct StringViewMerge {
         constexpr auto        viewsToAdd = ViewsToAddGetter::get();
         constexpr std::size_t arraySize  = [&]() {
             std::size_t sum = 0;
-            for(auto v : viewsToAdd) { sum += v.size(); }
+            for(auto const v : viewsToAdd) { sum += v.size(); }
             return sum;
         }();
 
         std::array<char, arraySize> ret{};
         auto                        it = begin(ret);
 
-        auto addString = [&it](std::string_view s) {
-            for(auto c : s) {
+        auto const addString = [&it](std::string_view s) {
+            for(auto const c : s) {
                 *it = c;
                 std::advance(it, 1);
             }
@@ -33,7 +33,7 @@ struct StringViewMerge {
     }
 
     static constexpr auto             buffer = gen();
-    static constexpr std::string_view string_view{buffer.data(), buffer.size()};
+    static constexpr std::string_view stringView{buffer.data(), buffer.size()};
 };
 
 template<typename F>
@@ -45,38 +45,38 @@ constexpr auto makeGetter(F) {
     return X{};
 }
 
-template<std::uint32_t... digits>
-struct to_chars {
-    inline static constexpr std::array<char, sizeof...(digits)> value{('0' + digits)...};
+template<std::uint32_t... DigitCount>
+struct ToChars {
+    static constexpr std::array<char, sizeof...(DigitCount)> value{('0' + DigitCount)...};
 };
 
-template<std::uint32_t rem, std::uint32_t... digits>
-struct explode : explode<rem / 10, rem % 10, digits...> {};
+template<std::uint32_t Rem, std::uint32_t... DigitCount>
+struct Explode : Explode<Rem / 10, Rem % 10, DigitCount...> {};
 
-template<std::uint32_t... digits>
-struct explode<0, digits...> : to_chars<digits...> {};
+template<std::uint32_t... DigitCount>
+struct Explode<0, DigitCount...> : ToChars<DigitCount...> {};
 
-template<std::uint32_t num>
-struct num_to_string : explode<num> {};
+template<std::uint32_t Num>
+struct NumToString : Explode<Num> {};
 
 template<>
-struct num_to_string<0> {
-    inline static constexpr std::array<char, 1> value{'0'};
+struct NumToString<0> {
+    static constexpr std::array<char, 1> value{'0'};
 };
 
 template<std::uint32_t Number>
-static constexpr std::string_view toStringView{num_to_string<Number>::value.data(),
-                                               num_to_string<Number>::value.size()};
+static constexpr std::string_view toStringView{NumToString<Number>::value.data(),
+                                               NumToString<Number>::value.size()};
 
-template<Version version>
-static constexpr std::string_view VersionToStringView{StringViewMerge<decltype(makeGetter([]() {
+template<Version V>
+static constexpr std::string_view versionToStringView{StringViewMerge<decltype(makeGetter([]() {
     return std::array{
-      toStringView<version.major>,
+      toStringView<V.major>,
       std::string_view{"."},
-      toStringView<version.minor>,
+      toStringView<V.minor>,
       std::string_view{"."},
-      toStringView<version.patch>,
+      toStringView<V.patch>,
     };
-}))>::string_view};
+}))>::stringView};
 
 }   // namespace CMakeGitVersion::detail

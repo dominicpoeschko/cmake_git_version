@@ -1,0 +1,31 @@
+name: CI
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        container:
+            image: archlinux:latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v5
+
+            - name: Set up the tools
+              run: |
+                pacman -Syu --noconfirm
+                pacman -S --noconfirm git cmake ninja gcc
+
+            # the tests make scratch repositories of their own; pure CMake, plus one consumer configure (C++ compiler)
+            - name: Configure
+              run: cmake -S tests -B build -G Ninja
+
+            - name: Run tests
+              run: ctest --test-dir build --output-on-failure

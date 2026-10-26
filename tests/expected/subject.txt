@@ -1,0 +1,17 @@
+#pragma once
+
+#include <string_view>
+
+namespace CMakeGitVersion::Git {
+#if !true   // NOLINT
+[[deprecated("git not found")]]
+#endif
+static constexpr std::string_view Hash{"f0f659c"};
+static constexpr std::string_view Dirty { false ? ".dirty" : "" };
+static constexpr std::string_view Subject{"quote \" dollar \$HOME tick ' semicolon a\073b tab end xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..."};
+static constexpr std::string_view Branch{"master"};
+static constexpr std::string_view Tag{"no-tag"};
+static constexpr std::string_view Author{"Test Author"};
+
+namespace detail { static constexpr DateTime CommitTime{"2001-02-03T04:05:06"}; }
+}   // namespace CMakeGitVersion::Git

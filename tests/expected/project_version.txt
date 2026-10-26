@@ -1,0 +1,25 @@
+#pragma once
+
+#include <string_view>
+
+namespace CMakeGitVersion::Project {
+static constexpr std::string_view Name{"consumer"};
+
+namespace detail {
+    static constexpr Version Version {
+        .major = 1,
+        .minor = 2,
+        .patch = 3
+    };
+}   // namespace detail
+}   // namespace CMakeGitVersion::Project
+
+namespace CMakeGitVersion::Target {
+static constexpr std::string_view Name{"consumer_target"};
+
+namespace detail { static constexpr DateTime CMakeTime{"<configure time>"}; }
+}   // namespace CMakeGitVersion::Target
+
+namespace CMakeGitVersion::Compiler {
+static constexpr std::string_view Optimization{"size"};
+}   // namespace CMakeGitVersion::Compiler

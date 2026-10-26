@@ -8,42 +8,42 @@
 
 namespace CMakeGitVersion {
 
-static constexpr std::string_view FullVersion{
+static constexpr std::string_view fullVersion{
   detail::StringViewMerge<decltype(detail::makeGetter([]() {
       return std::array{Project::Name,
                         std::string_view{"("},
-                        Project::Version,
+                        Project::version,
                         std::string_view{"+"},
                         Git::Hash,
                         Git::Dirty,
                         std::string_view{" "},
-                        Target::BuildTime,
+                        Target::buildTime,
                         std::string_view{" "},
                         Target::Name,
                         std::string_view{"/"},
                         Compiler::Optimization,
                         std::string_view{" "},
-                        Compiler::Name,
+                        Compiler::name,
                         std::string_view{"-"},
-                        Compiler::Version,
+                        Compiler::version,
                         std::string_view{")"}};
-  }))>::string_view};
+  }))>::stringView};
 
-static constexpr std::string_view NameTargetVersion{
+static constexpr std::string_view nameTargetVersion{
   detail::StringViewMerge<decltype(detail::makeGetter([]() {
       return std::array{Project::Name,
                         std::string_view{" "},
                         Target::Name,
                         std::string_view{" "},
-                        Project::Version};
-  }))>::string_view};
+                        Project::version};
+  }))>::stringView};
 
-static constexpr std::string_view ShortVersion{
+static constexpr std::string_view shortVersion{
   detail::StringViewMerge<decltype(detail::makeGetter([]() {
-      return std::array{Project::Version, std::string_view{"+"}, Git::Hash, Git::Dirty};
-  }))>::string_view};
+      return std::array{Project::version, std::string_view{"+"}, Git::Hash, Git::Dirty};
+  }))>::stringView};
 
-static constexpr std::string_view GitInfo{detail::StringViewMerge<decltype(detail::makeGetter([]() {
+static constexpr std::string_view gitInfo{detail::StringViewMerge<decltype(detail::makeGetter([]() {
     return std::array{std::string_view{"branch:"},
                       Git::Branch,
                       std::string_view{" "},
@@ -52,14 +52,14 @@ static constexpr std::string_view GitInfo{detail::StringViewMerge<decltype(detai
                       std::string_view{" (author: "},
                       Git::Author,
                       std::string_view{")"}};
-}))>::string_view};
+}))>::stringView};
 
-static constexpr std::string_view DebugString{
+static constexpr std::string_view debugString{
   detail::StringViewMerge<decltype(detail::makeGetter([]() {
       return std::array{std::string_view{"Project: "},
                         Project::Name,
                         std::string_view{" "},
-                        Project::Version,
+                        Project::version,
                         std::string_view{"\n"},
                         std::string_view{"Git: "},
                         Git::Branch,
@@ -72,7 +72,7 @@ static constexpr std::string_view DebugString{
                         std::string_view{"Commit: "},
                         Git::Subject,
                         std::string_view{" ("},
-                        Git::CommitTime,
+                        Git::commitTime,
                         std::string_view{")\n"},
                         std::string_view{"Tag: "},
                         Git::Tag,
@@ -83,14 +83,14 @@ static constexpr std::string_view DebugString{
                         Compiler::Optimization,
                         std::string_view{")\n"},
                         std::string_view{"Built: "},
-                        Target::BuildTime,
+                        Target::buildTime,
                         std::string_view{" (CMake: "},
-                        Target::CMakeTime,
+                        Target::cmakeTime,
                         std::string_view{")\n"},
                         std::string_view{"Compiler: "},
-                        Compiler::Name,
+                        Compiler::name,
                         std::string_view{" "},
-                        Compiler::Version};
-  }))>::string_view};
+                        Compiler::version};
+  }))>::stringView};
 
 }   // namespace CMakeGitVersion

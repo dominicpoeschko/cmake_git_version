@@ -7,6 +7,6 @@
 
 namespace CMakeGitVersion::Git {
 
-static constexpr std::string_view CommitTime{detail::CommitTime.sv()};
+static constexpr std::string_view commitTime{detail::CommitTime.sv()};
 
 }   // namespace CMakeGitVersion::Git

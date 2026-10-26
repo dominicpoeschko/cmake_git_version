@@ -13,8 +13,8 @@ namespace detail {
     #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
 #endif
     template<std::size_t N>
-    consteval void compile_time_assert(char const (&str)[N],
-                                       bool predicate) {
+    consteval void compileTimeAssert(char const (&str)[N],
+                                     bool predicate) {
         [[maybe_unused]] auto const x = str[N - 1 + static_cast<std::size_t>(!predicate)];
     }
 #ifdef __clang__
@@ -25,32 +25,34 @@ namespace detail {
 struct DateTime {
     std::array<char, 19> buffer{};
 
-    constexpr std::string_view sv() const { return std::string_view{buffer.data(), buffer.size()}; }
+    [[nodiscard]] constexpr std::string_view sv() const {
+        return std::string_view{buffer.data(), buffer.size()};
+    }
 
     template<typename T>
     consteval DateTime(T s) {
         std::string_view input{s};
-        detail::compile_time_assert("bad DateTime", input.size() == 19 || input.size() == 20);
+        detail::compileTimeAssert("bad DateTime", input.size() == 19 || input.size() == 20);
 
         if(input.size() == 19) {
-            detail::compile_time_assert("bad DateTime", input.size() == 19);
-            detail::compile_time_assert("bad DateTime", input[4] == '-');
-            detail::compile_time_assert("bad DateTime", input[7] == '-');
-            detail::compile_time_assert("bad DateTime", input[10] == 'T');
-            detail::compile_time_assert("bad DateTime", input[13] == ':');
-            detail::compile_time_assert("bad DateTime", input[16] == ':');
+            detail::compileTimeAssert("bad DateTime", input.size() == 19);
+            detail::compileTimeAssert("bad DateTime", input[4] == '-');
+            detail::compileTimeAssert("bad DateTime", input[7] == '-');
+            detail::compileTimeAssert("bad DateTime", input[10] == 'T');
+            detail::compileTimeAssert("bad DateTime", input[13] == ':');
+            detail::compileTimeAssert("bad DateTime", input[16] == ':');
 
             std::ranges::copy(input, buffer.begin());
             buffer[10] = ' ';
         } else if(input.size() == 20) {
-            detail::compile_time_assert("bad DateTime", input.size() == 20);
-            detail::compile_time_assert("bad DateTime", input[3] == ' ');
-            detail::compile_time_assert("bad DateTime", input[6] == ' ');
-            detail::compile_time_assert("bad DateTime", input[11] == ' ');
-            detail::compile_time_assert("bad DateTime", input[14] == ':');
-            detail::compile_time_assert("bad DateTime", input[17] == ':');
+            detail::compileTimeAssert("bad DateTime", input.size() == 20);
+            detail::compileTimeAssert("bad DateTime", input[3] == ' ');
+            detail::compileTimeAssert("bad DateTime", input[6] == ' ');
+            detail::compileTimeAssert("bad DateTime", input[11] == ' ');
+            detail::compileTimeAssert("bad DateTime", input[14] == ':');
+            detail::compileTimeAssert("bad DateTime", input[17] == ':');
 
-            constexpr std::array MonthNames{std::string_view{"Jan 01"},
+            constexpr std::array monthNames{std::string_view{"Jan 01"},
                                             std::string_view{"Feb 02"},
                                             std::string_view{"Mar 03"},
                                             std::string_view{"Apr 04"},
@@ -64,7 +66,7 @@ struct DateTime {
                                             std::string_view{"Dec 12"}};
 
             std::string_view month{};
-            for(auto const& m : MonthNames) {
+            for(auto const& m : monthNames) {
                 if(input.starts_with(m.substr(0, 3))) {
                     month = m.substr(4, 2);
                     break;
@@ -79,8 +81,8 @@ struct DateTime {
             auto const year = input.substr(7, 4);
             auto const time = input.substr(12, 8);
 
-            auto out = buffer.begin();
-            auto add = [&](auto ss) { out = std::copy(std::begin(ss), std::end(ss), out); };
+            auto       out = buffer.begin();
+            auto const add = [&](auto ss) { out = std::copy(std::begin(ss), std::end(ss), out); };
 
             add(year);
             add(std::string_view{"-"});
