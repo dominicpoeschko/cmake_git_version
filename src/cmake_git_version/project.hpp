@@ -10,11 +10,11 @@ namespace CMakeGitVersion {
 
 namespace Project {
     static constexpr std::string_view version{
-      ::CMakeGitVersion::detail::versionToStringView<detail::Version>};
+      ::CMakeGitVersion::Detail::versionToStringView<detail::Version>};
 }
 
 namespace Target {
-    namespace detail {
+    namespace Detail {
 #ifdef __clang__
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wdate-time"
@@ -23,10 +23,10 @@ namespace Target {
 #ifdef __clang__
     #pragma clang diagnostic pop
 #endif
-    }   // namespace detail
+    }   // namespace Detail
 
     static constexpr std::string_view cmakeTime{detail::CMakeTime.sv()};
-    static constexpr std::string_view buildTime{detail::buildTime.sv()};
+    static constexpr std::string_view buildTime{Detail::buildTime.sv()};
 }   // namespace Target
 
 }   // namespace CMakeGitVersion

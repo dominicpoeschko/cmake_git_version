@@ -10,7 +10,7 @@ namespace CMakeGitVersion::Compiler {
 #ifdef __clang__
 static constexpr std::string_view name{"Clang"};
 
-namespace detail {
+namespace Detail {
     static constexpr Version version{.major = __clang_major__,
                                      .minor = __clang_minor__,
                                      .patch = __clang_patchlevel__};
@@ -21,7 +21,7 @@ namespace detail {
 #elif defined(_MSC_VER)
 static constexpr std::string_view name{"MSVC"};
 
-namespace detail {
+namespace Detail {
     static constexpr Version version{.major = (_MSC_VER - (_MSC_VER % 100)) / 100,
                                      .minor = _MSC_VER % 100,
                                      .patch = 0};
@@ -29,7 +29,7 @@ namespace detail {
 #else
 static constexpr std::string_view name{"GCC"};
 
-namespace detail {
+namespace Detail {
     static constexpr Version version{.major = __GNUC__,
                                      .minor = __GNUC_MINOR__,
                                      .patch = __GNUC_PATCHLEVEL__};
@@ -37,6 +37,6 @@ namespace detail {
 #endif
 
 static constexpr std::string_view version{
-  ::CMakeGitVersion::detail::versionToStringView<detail::version>};
+  ::CMakeGitVersion::Detail::versionToStringView<Detail::version>};
 
 }   // namespace CMakeGitVersion::Compiler

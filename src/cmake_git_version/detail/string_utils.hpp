@@ -5,7 +5,7 @@
 #include <array>
 #include <string_view>
 
-namespace CMakeGitVersion::detail {
+namespace CMakeGitVersion::Detail {
 
 template<typename ViewsToAddGetter>
 struct StringViewMerge {
@@ -79,4 +79,4 @@ static constexpr std::string_view versionToStringView{StringViewMerge<decltype(m
     };
 }))>::stringView};
 
-}   // namespace CMakeGitVersion::detail
+}   // namespace CMakeGitVersion::Detail

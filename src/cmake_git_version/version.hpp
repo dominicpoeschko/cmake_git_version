@@ -9,7 +9,7 @@
 namespace CMakeGitVersion {
 
 static constexpr std::string_view fullVersion{
-  detail::StringViewMerge<decltype(detail::makeGetter([]() {
+  Detail::StringViewMerge<decltype(Detail::makeGetter([]() {
       return std::array{Project::Name,
                         std::string_view{"("},
                         Project::version,
@@ -30,7 +30,7 @@ static constexpr std::string_view fullVersion{
   }))>::stringView};
 
 static constexpr std::string_view nameTargetVersion{
-  detail::StringViewMerge<decltype(detail::makeGetter([]() {
+  Detail::StringViewMerge<decltype(Detail::makeGetter([]() {
       return std::array{Project::Name,
                         std::string_view{" "},
                         Target::Name,
@@ -39,11 +39,11 @@ static constexpr std::string_view nameTargetVersion{
   }))>::stringView};
 
 static constexpr std::string_view shortVersion{
-  detail::StringViewMerge<decltype(detail::makeGetter([]() {
+  Detail::StringViewMerge<decltype(Detail::makeGetter([]() {
       return std::array{Project::version, std::string_view{"+"}, Git::Hash, Git::Dirty};
   }))>::stringView};
 
-static constexpr std::string_view gitInfo{detail::StringViewMerge<decltype(detail::makeGetter([]() {
+static constexpr std::string_view gitInfo{Detail::StringViewMerge<decltype(Detail::makeGetter([]() {
     return std::array{std::string_view{"branch:"},
                       Git::Branch,
                       std::string_view{" "},
@@ -55,7 +55,7 @@ static constexpr std::string_view gitInfo{detail::StringViewMerge<decltype(detai
 }))>::stringView};
 
 static constexpr std::string_view debugString{
-  detail::StringViewMerge<decltype(detail::makeGetter([]() {
+  Detail::StringViewMerge<decltype(Detail::makeGetter([]() {
       return std::array{std::string_view{"Project: "},
                         Project::Name,
                         std::string_view{" "},

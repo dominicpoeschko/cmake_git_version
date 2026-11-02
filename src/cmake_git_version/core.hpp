@@ -7,7 +7,7 @@
 
 namespace CMakeGitVersion {
 
-namespace detail {
+namespace Detail {
 #ifdef __clang__
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
@@ -20,7 +20,7 @@ namespace detail {
 #ifdef __clang__
     #pragma clang diagnostic pop
 #endif
-}   // namespace detail
+}   // namespace Detail
 
 struct DateTime {
     std::array<char, 19> buffer{};
@@ -32,25 +32,25 @@ struct DateTime {
     template<typename T>
     consteval DateTime(T s) {
         std::string_view input{s};
-        detail::compileTimeAssert("bad DateTime", input.size() == 19 || input.size() == 20);
+        Detail::compileTimeAssert("bad DateTime", input.size() == 19 || input.size() == 20);
 
         if(input.size() == 19) {
-            detail::compileTimeAssert("bad DateTime", input.size() == 19);
-            detail::compileTimeAssert("bad DateTime", input[4] == '-');
-            detail::compileTimeAssert("bad DateTime", input[7] == '-');
-            detail::compileTimeAssert("bad DateTime", input[10] == 'T');
-            detail::compileTimeAssert("bad DateTime", input[13] == ':');
-            detail::compileTimeAssert("bad DateTime", input[16] == ':');
+            Detail::compileTimeAssert("bad DateTime", input.size() == 19);
+            Detail::compileTimeAssert("bad DateTime", input[4] == '-');
+            Detail::compileTimeAssert("bad DateTime", input[7] == '-');
+            Detail::compileTimeAssert("bad DateTime", input[10] == 'T');
+            Detail::compileTimeAssert("bad DateTime", input[13] == ':');
+            Detail::compileTimeAssert("bad DateTime", input[16] == ':');
 
             std::ranges::copy(input, buffer.begin());
             buffer[10] = ' ';
         } else if(input.size() == 20) {
-            detail::compileTimeAssert("bad DateTime", input.size() == 20);
-            detail::compileTimeAssert("bad DateTime", input[3] == ' ');
-            detail::compileTimeAssert("bad DateTime", input[6] == ' ');
-            detail::compileTimeAssert("bad DateTime", input[11] == ' ');
-            detail::compileTimeAssert("bad DateTime", input[14] == ':');
-            detail::compileTimeAssert("bad DateTime", input[17] == ':');
+            Detail::compileTimeAssert("bad DateTime", input.size() == 20);
+            Detail::compileTimeAssert("bad DateTime", input[3] == ' ');
+            Detail::compileTimeAssert("bad DateTime", input[6] == ' ');
+            Detail::compileTimeAssert("bad DateTime", input[11] == ' ');
+            Detail::compileTimeAssert("bad DateTime", input[14] == ':');
+            Detail::compileTimeAssert("bad DateTime", input[17] == ':');
 
             constexpr std::array monthNames{std::string_view{"Jan 01"},
                                             std::string_view{"Feb 02"},
