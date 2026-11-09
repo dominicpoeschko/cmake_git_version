@@ -16,7 +16,7 @@ jobs:
             image: archlinux:latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v5
+              uses: actions/checkout@v7
 
             - name: Set up the tools
               run: |
@@ -28,4 +28,4 @@ jobs:
               run: cmake -S tests -B build -G Ninja
 
             - name: Run tests
-              run: ctest --test-dir build --output-on-failure
+              run: ctest --test-dir build --output-on-failure -j"$(nproc)"
